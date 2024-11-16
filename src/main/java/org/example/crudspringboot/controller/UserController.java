@@ -1,5 +1,7 @@
 package org.example.crudspringboot.controller;
 
+import org.example.crudspringboot.model.Role;
+import org.example.crudspringboot.model.RoleType;
 import org.example.crudspringboot.model.User;
 import org.example.crudspringboot.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequestMapping("/users")
@@ -25,6 +28,12 @@ public class UserController {
     }
 
     //TODO: добавить метод для принятия @PutMapping("/{id}/roles") updateUserRoles(@PathVariable Long id, @RequestBody Set<RoleType> roles)
+
+    @PutMapping("/{id}/roles")
+    public ResponseEntity<String> updateUserRoles(@PathVariable Long id, @RequestBody Set<Role> roles) {
+        userService.updateUserRoles(id, roles);
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/list")
     public ResponseEntity<List<User>> getAllUsers() {

@@ -41,7 +41,6 @@ class UserServiceTest {
 
         // Настройка роли по умолчанию
         Role defaultRole = new Role();
-        defaultRole.setRoleType(RoleType.USER);
         when(roleService.getDefaultRole()).thenReturn(defaultRole);
     }
 

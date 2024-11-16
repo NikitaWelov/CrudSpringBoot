@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import org.example.crudspringboot.dao.RoleDao;
 import org.example.crudspringboot.dao.UserDao;
 import org.example.crudspringboot.model.Role;
+import org.example.crudspringboot.model.RoleType;
 import org.example.crudspringboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
