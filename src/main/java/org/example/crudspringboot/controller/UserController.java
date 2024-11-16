@@ -19,6 +19,10 @@ public class UserController {
     public UserController(UserService userService) {
         this.userService = userService;
     }
+    @GetMapping
+    public String getUsersHTML() {
+        return "users";
+    }
 
     @GetMapping("/list")
     public ResponseEntity<List<User>> getAllUsers() {
