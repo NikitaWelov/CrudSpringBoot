@@ -3,12 +3,11 @@ package org.example.crudspringboot.controller;
 import org.example.crudspringboot.model.User;
 import org.example.crudspringboot.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/users")
@@ -21,19 +20,34 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/users")
-    public String getAllUsers(Model model) {
-     model.addAttribute("users", userService.getAllUsers());
-     model.addAttribute("user", new User());
-     return "user-management";
+    @GetMapping("/list")
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        return ResponseEntity.ok().body(users);
     }
 
     @PostMapping
-    public String saveUser(@ModelAttribute("user") User user) {
+    public ResponseEntity<User> saveUser(@RequestBody User user) {
         userService.saveUser(user);
-        return "redirect:/users";
+        return ResponseEntity.ok().body(user);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<User> deleteUser(@PathVariable Long id) {
+        User user = userService.getUserById(id);
+        if (user != null) {
+            userService.deleteUser(user);
+        }
+        return ResponseEntity.ok().body(user);
+    }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+        User user1 = userService.getUserById(id);
+        if (user1 != null) {
+            userService.updateUser(user);
+        }
+        return ResponseEntity.ok().body(user);
+    }
 
 }
