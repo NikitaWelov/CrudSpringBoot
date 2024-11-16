@@ -2,6 +2,7 @@ package org.example.crudspringboot.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.crudspringboot.model.Role;
+import org.example.crudspringboot.model.RoleType;
 import org.example.crudspringboot.model.User;
 import org.example.crudspringboot.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        Role userRole = new Role(1L, Role.RoleType.USER);
+        Role userRole = new Role(1L, RoleType.USER);
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
 

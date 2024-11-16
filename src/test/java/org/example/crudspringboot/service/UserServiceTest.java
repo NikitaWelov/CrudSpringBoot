@@ -2,6 +2,7 @@ package org.example.crudspringboot.service;
 
 import org.example.crudspringboot.dao.UserDao;
 import org.example.crudspringboot.model.Role;
+import org.example.crudspringboot.model.RoleType;
 import org.example.crudspringboot.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,13 +27,22 @@ class UserServiceTest {
 
     private User testUser;
 
+    @Mock
+    private RoleService roleService;
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        Role userRole = new Role(1L, Role.RoleType.USER);
-        Set<Role> roles = Set.of(userRole);
-        testUser = new User(1L, "testUser", "testLastname", "test@example.com", roles);
+        // Создаем тестового пользователя без роли
+        testUser = new User();
+        testUser.setUsername("testUser");
+        testUser.setEmail("test@example.com");
+
+        // Настройка роли по умолчанию
+        Role defaultRole = new Role();
+        defaultRole.setRoleType(RoleType.USER);
+        when(roleService.getDefaultRole()).thenReturn(defaultRole);
     }
 
     @Test
@@ -47,7 +57,7 @@ class UserServiceTest {
     @Test
     void updateUserRoles_ShouldUpdateUserRoles() {
         Long userId = 1L;
-        Set<Role> newRoles = Set.of(new Role(2L, Role.RoleType.ADMIN));
+        Set<Role> newRoles = Set.of(new Role(2L, RoleType.ADMIN));
 
         when(userDao.findById(userId)).thenReturn(testUser);
 
@@ -102,7 +112,7 @@ class UserServiceTest {
 
     @Test
     void updateUser_ShouldUpdateOnlyChangedFields() {
-        User oldUser = new User(1L, "oldUsername", "oldLastname", "old@example.com", Set.of(new Role(1L, Role.RoleType.USER)));
+        User oldUser = new User(1L, "oldUsername", "oldLastname", "old@example.com", Set.of(new Role(1L, RoleType.USER)));
         when(userDao.findById(testUser.getId())).thenReturn(oldUser);
         doNothing().when(userDao).save(any(User.class));
 

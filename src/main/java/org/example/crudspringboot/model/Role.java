@@ -20,9 +20,4 @@ public class Role {
     @Enumerated(EnumType.STRING)
     private RoleType name;
 
-    public enum RoleType {
-        USER,
-        ADMIN,
-        MODERATOR
-    }
 }

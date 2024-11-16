@@ -3,6 +3,7 @@ package org.example.crudspringboot.service;
 import jakarta.transaction.Transactional;
 import org.example.crudspringboot.dao.RoleDao;
 import org.example.crudspringboot.model.Role;
+import org.example.crudspringboot.model.RoleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,6 @@ public class RoleService {
 
     @Transactional
     public Role getDefaultRole() {
-        return roleDao.findByName(Role.RoleType.USER.name());
+        return roleDao.findByName(RoleType.USER.name());
     }
 }
