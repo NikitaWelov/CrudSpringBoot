@@ -24,6 +24,8 @@ public class UserController {
         return "users";
     }
 
+    //TODO: добавить метод для принятия @PutMapping("/{id}/roles") updateUserRoles(@PathVariable Long id, @RequestBody Set<RoleType> roles)
+
     @GetMapping("/list")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();

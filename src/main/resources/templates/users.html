@@ -201,32 +201,25 @@
 
     function renderUserItems() {
         userList.innerHTML = '';
-
         users.forEach(user => {
             const userItem = document.createElement('div');
             userItem.className = 'user-item';
+
+            const roleSelectHtml = `
+            <select id="roleSelect${user.id}" class="role-select" multiple>
+                <option value="USER" ${user.roles.includes('USER') ? 'selected' : ''}>User</option>
+                <option value="ADMIN" ${user.roles.includes('ADMIN') ? 'selected' : ''}>Admin</option>
+                <option value="MODERATOR" ${user.roles.includes('MODERATOR') ? 'selected' : ''}>Moderator</option>
+            </select>
+        `;
+
             userItem.innerHTML = `
             <div class="user-details">
-                <strong>Имя: </strong>
-                <span class="editable" contenteditable="true"
-                      onBlur="updateUser(${user.id}, 'username', this.textContent)"
-                      onKeyPress="handleEnter(event, ${user.id}, 'username', this)">${user.username}</span><br>
-                <strong>Фамилия: </strong>
-                <span class="editable" contenteditable="true"
-                      onBlur="updateUser(${user.id}, 'lastname', this.textContent)"
-                      onKeyPress="handleEnter(event, ${user.id}, 'lastname', this)">${user.lastname}</span><br>
-                <strong>Email: </strong>
-                <span class="editable" contenteditable="true"
-                      onBlur="updateUser(${user.id}, 'email', this.textContent)"
-                      onKeyPress="handleEnter(event, ${user.id}, 'email', this)">${user.email}</span>
+                <!-- ... остальные поля ... -->
             </div>
-
             <div class="actions">
-                <select id="roleSelect${user.id}" class="role-select">
-                    <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>
-                    <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>Admin</option>
-                </select>
-                <button class="save-role-button" onclick="saveRole(${user.id})">Сохранить роль</button>
+                ${roleSelectHtml}
+                <button class="save-role-button" onclick="saveRole(${user.id})">Сохранить роли</button>
                 <button class="delete-button" onclick="deleteUser(${user.id})">Удалить</button>
             </div>
         `;
@@ -283,12 +276,33 @@
     }
 
     function saveRole(userId) {
-        const role = document.getElementById(`roleSelect${userId}`).value;
-        fetch(`/users/${userId}/roles`, {
+        const roleSelect = document.getElementById(`roleSelect${userId}`);
+        const selectedRoles = Array.from(roleSelect.selectedOptions)
+            .map(option => option.value);
+
+        fetch(`/api/users/${userId}/roles`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ role }),
-        });
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content // Для Spring Security
+            },
+            body: JSON.stringify(selectedRoles)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to update roles');
+                }
+                // Обновляем UI только после успешного сохранения
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    user.roles = selectedRoles;
+                    renderUserItems();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ошибка при обновлении ролей');
+            });
     }
 
     function deleteUser(userId) {

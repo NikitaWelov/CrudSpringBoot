@@ -20,8 +20,11 @@ public class UserService {
 
     @Transactional
     public void saveUser(User user) {
+        //TODO: При создании пользователя устанавливаем роль по умолчанию (USER)
         userDao.save(user);
     }
+
+    // TODO: Добавить метод updateUserRoles(Long userId, Set<Role> roles) который будет обновлять роль у пользователя
 
     @Transactional
     public void deleteUser(User user) {
