@@ -220,6 +220,7 @@
                       onBlur="updateUser(${user.id}, 'email', this.textContent)"
                       onKeyPress="handleEnter(event, ${user.id}, 'email', this)">${user.email}</span>
             </div>
+
             <div class="actions">
                 <select id="roleSelect${user.id}" class="role-select">
                     <option value="user" ${user.role === 'user' ? 'selected' : ''}>User</option>

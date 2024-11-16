@@ -28,19 +28,22 @@ public class UserService {
         userDao.delete(user);
     }
 
+    @Transactional
     public User getUserById(Long id) {
         return userDao.findById(id);
     }
 
+    @Transactional
     public List<User> getAllUsers() {
         return userDao.findAll();
     }
 
+    @Transactional
     public User getUserByUsername(String username) {
         return userDao.findByUsername(username);
     }
 
-
+    @Transactional
     public void updateUser(User user) {
         User oldUser = userDao.findById(user.getId());
 
