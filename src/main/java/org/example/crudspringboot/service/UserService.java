@@ -70,6 +70,10 @@ public class UserService {
     public void updateUser(User user) {
         User oldUser = userDao.findById(user.getId());
 
+        if (oldUser == null) {
+            System.out.println("oldUser is null");
+        }
+
         if (!oldUser.getUsername().equals(user.getUsername())) {
             user.setUsername(user.getUsername());
         }
@@ -79,6 +83,6 @@ public class UserService {
         if (!oldUser.getEmail().equals(user.getEmail())) {
             user.setEmail(user.getEmail());
         }
-        userDao.save(user);
+        userDao.save(oldUser);
     }
 }
