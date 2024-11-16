@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Пользователи</title>
+    <meta charset="UTF-8">
+    <style>
+        /* Общий стиль */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        #user-management {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #user-management input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        #user-management button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #user-list {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .user-item input[type="checkbox"] {
+            margin-right: 10px;
+        }
+
+        .user-item .actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-item .actions button {
+            padding: 5px 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .user-item .actions .delete-button {
+            background-color: #f44336;
+        }
+
+        .user-item .actions .save-role-button {
+            background-color: #2196F3;
+        }
+    </style>
+</head>
+<body>
+<h1>Пользователи</h1>
+
+<div id="user-management">
+    <input type="text" id="username-input" placeholder="Имя пользователя">
+    <button id="create-button">Создать пользователя</button>
+</div>
+
+<div id="user-list">
+    <!-- User items will be dynamically generated here -->
+</div>
+
+<script>
+    let users = [];
+
+    const userList = document.getElementById('user-list');
+    const usernameInput = document.getElementById('username-input');
+    const createButton = document.getElementById('create-button');
+
+    // Function to render user items
+    function renderUserItems() {
+        userList.innerHTML = '';
+
+        users.forEach(user => {
+            const userItem = document.createElement('div');
+            userItem.className = 'user-item';
+            userItem.innerHTML = `
+                    <input type="checkbox">
+                    <span>${user.username}</span>
+                    <div class="actions">
+                        <select id="roleSelect${user.id}" class="role-select">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button class="save-role-button" onclick="saveRole(${user.id})">Сохранить роль</button>
+                        <button class="delete-button" onclick="deleteUser(${user.id})">Удалить</button>
+                    </div>
+                `;
+            userList.appendChild(userItem);
+        });
+    }
+
+    // Function to create a new user
+    function createUser() {
+        const username = usernameInput.value.trim();
+        if (username !== '') {
+            const data = { username: username };
+
+            fetch('/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+                .then(response => response.json())
+                .then(user => {
+                    users.push(user);
+                    renderUserItems();
+                    usernameInput.value = '';
+                })
+                .catch(error => console.error('Ошибка при добавлении пользователя:', error));
+        }
+    }
+
+    // Function to save user role
+    function saveRole(userId) {
+        const roleSelect = document.getElementById(`roleSelect${userId}`);
+        const role = roleSelect.value;
+
+        fetch(`/users/${userId}/roles`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role }),
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert('Роль успешно обновлена!');
+                } else {
+                    console.error('Ошибка при обновлении роли пользователя');
+                }
+            })
+            .catch(error => console.error('Ошибка при обновлении роли:', error));
+    }
+
+    // Function to delete a user
+    function deleteUser(userId) {
+        fetch(`/users/${userId}`, {
+            method: 'DELETE',
+        })
+            .then(response => {
+                if (response.ok) {
+                    users = users.filter(user => user.id !== userId);
+                    renderUserItems();
+                } else {
+                    console.error('Ошибка при удалении пользователя');
+                }
+            })
+            .catch(error => console.error('Ошибка при удалении пользователя:', error));
+    }
+
+    // Event listener for create button click
+    createButton.addEventListener('click', createUser);
+
+    // Load users on page load
+    fetch('/users/list')
+        .then(response => response.json())
+        .then(data => {
+            users = data;
+            renderUserItems();
+        })
+        .catch(error => console.error('Ошибка при загрузке пользователей:', error));
+</script>
+</body>
+</html>
