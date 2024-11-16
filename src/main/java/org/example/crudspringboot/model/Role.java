@@ -12,9 +12,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Role {
+
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    Long id;
-    @OneToMany
-    String name;
+    private Long id;
+
+    @Enumerated(EnumType.STRING)
+    private RoleType name;
+
+    public enum RoleType {
+        USER,
+        ADMIN,
+        MODERATOR
+    }
 }

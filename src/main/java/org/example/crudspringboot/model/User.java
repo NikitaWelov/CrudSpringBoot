@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -17,7 +19,10 @@ public class User {
     private String username;
     private String lastname;
     private String email;
-    @ManyToOne
-    @JoinTable(name = "userroles")
-    private String role;
+
+    @ManyToMany
+    @JoinTable(name = "userroles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles;
 }
