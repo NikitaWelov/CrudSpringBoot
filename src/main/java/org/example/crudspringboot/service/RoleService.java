@@ -23,7 +23,6 @@ public class RoleService {
 
     @Transactional
     public Role getDefaultRole() {
-        Role defaultRole = roleDao.findByName(Role.RoleType.USER.name());
-        return defaultRole;
+        return roleDao.findByName(Role.RoleType.USER.name());
     }
 }
