@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table (name = "UserTable")
+@Table (name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,4 +17,7 @@ public class User {
     private String username;
     private String lastname;
     private String email;
+    @ManyToOne
+    @JoinTable(name = "userroles")
+    private String role;
 }
