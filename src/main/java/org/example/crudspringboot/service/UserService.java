@@ -6,6 +6,7 @@ import org.example.crudspringboot.dao.UserDao;
 import org.example.crudspringboot.model.Role;
 import org.example.crudspringboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UserService {
 
+    private final PasswordEncoder passwordEncoder;
     private final UserDao userDao;
     private final RoleDao roleDao;
 

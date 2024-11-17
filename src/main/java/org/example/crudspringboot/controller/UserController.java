@@ -1,7 +1,5 @@
 package org.example.crudspringboot.controller;
 
-import org.example.crudspringboot.model.Role;
-import org.example.crudspringboot.model.RoleType;
 import org.example.crudspringboot.model.User;
 import org.example.crudspringboot.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
