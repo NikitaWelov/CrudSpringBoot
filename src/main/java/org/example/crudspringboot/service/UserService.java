@@ -1,9 +1,12 @@
 package org.example.crudspringboot.service;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.crudspringboot.dao.RoleDao;
 import org.example.crudspringboot.dao.UserDao;
 import org.example.crudspringboot.model.Role;
+import org.example.crudspringboot.model.RoleType;
 import org.example.crudspringboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +33,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public List<User> getAllUsers() {
         log.info("Fetching all users...");
         List<User> users = userDao.findAll();
@@ -37,6 +41,7 @@ public class UserService {
         return users;
     }
 
+    @Transactional
     public void updateUser(Long id, User updatedUser) {
         log.info("Updating user with ID: {}", id);
         User user = userDao.findById(id);
@@ -54,6 +59,7 @@ public class UserService {
         log.info("User with ID: {} successfully updated", id);
     }
 
+    @Transactional
     public void updateUserRoles(Long id, Set<String> roleNames) {
         log.info("Updating roles for user with ID: {}", id);
         User user = userDao.findById(id);
@@ -81,6 +87,7 @@ public class UserService {
         log.info("Roles for user with ID: {} successfully updated", id);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         log.info("Deleting user with ID: {}", id);
         if (userDao.findById(id) == null) {
@@ -92,6 +99,7 @@ public class UserService {
     }
 
     // ???????????
+    @Transactional
     public void saveUser(User user) {
         log.info("Creating user: {}", user);
         String encodedPassword = passwordEncoder.encode(user.getPassword());
@@ -109,6 +117,7 @@ public class UserService {
         log.info("User with ID: {} successfully created", user.getId());
     }
 
+    @Transactional
     public void createAdmin(String username, String password) {
         log.info("Creating admin user: {}", username);
         Role adminRole = roleDao.findByName("ADMIN");
@@ -127,5 +136,19 @@ public class UserService {
 
     public User getByUsername(String username) {
         return userDao.findByUsername(username);
+    }
+
+    @PostConstruct
+    public void init() {
+        if (roleDao.findByName("ADMIN") == null) {
+          Role admin = new Role();
+          admin.setName(RoleType.ADMIN);
+          roleDao.save(admin);
+        }
+        if (roleDao.findByName("USER") == null) {
+            Role user = new Role();
+            user.setName(RoleType.USER);
+            roleDao.save(user);
+        }
     }
 }
