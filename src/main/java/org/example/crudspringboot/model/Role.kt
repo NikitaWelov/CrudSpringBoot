@@ -1,23 +1,16 @@
-package org.example.crudspringboot.model;
+package org.example.crudspringboot.model
 
-
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*
 
 @Entity
 @Table(name = "roles")
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Role {
-
+data class Role(
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
 
     @Enumerated(EnumType.STRING)
-    private RoleType name;
-
+    val name: RoleType
+) {
+    constructor() : this(null, RoleType.USER)
 }

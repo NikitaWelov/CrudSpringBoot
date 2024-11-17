@@ -1,28 +1,28 @@
-package org.example.crudspringboot.model;
+package org.example.crudspringboot.model
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Set;
+import jakarta.persistence.*
+import java.util.*
 
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Table (name = "users")
-public class User {
+@Table(name = "users")
+data class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String username;
-    private String lastname;
-    private String email;
+    val id: Long? = null,
+
+    var username: String,
+
+    var lastname: String,
+
+    var email: String,
 
     @ManyToMany
-    @JoinTable(name = "userroles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles;
+    @JoinTable(
+        name = "userroles",
+        joinColumns = [JoinColumn(name = "user_id")],
+        inverseJoinColumns = [JoinColumn(name = "role_id")]
+    )
+    var roles: Set<Role> = emptySet()
+) {
+    constructor() : this(null, "", "", "", emptySet())
 }

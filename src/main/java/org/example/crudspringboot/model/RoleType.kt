@@ -1,6 +1,6 @@
-package org.example.crudspringboot.model;
+package org.example.crudspringboot.model
 
-public enum RoleType {
+enum class RoleType {
     USER,
     ADMIN,
     MODERATOR
