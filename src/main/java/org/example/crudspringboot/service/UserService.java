@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,9 +24,10 @@ public class UserService {
     private final RoleDao roleDao;
 
     @Autowired
-    public UserService(UserDao userDao, RoleDao roleDao) {
+    public UserService(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
         this.roleDao = roleDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> getAllUsers() {
@@ -86,5 +89,39 @@ public class UserService {
         }
         userDao.deleteById(id);
         log.info("User with ID: {} successfully deleted", id);
+    }
+
+    // ???????????
+    public void saveUser(User user) {
+        log.info("Creating user: {}", user);
+        String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        if (user.getRoles() == null || user.getRoles().isEmpty()) {
+          Role defaultRole = roleDao.findByName("USER");
+          if (defaultRole != null) {
+              user.setRoles(new HashSet<>(Collections.singletonList(defaultRole)));
+          } else {
+              log.warn("Default role 'USER' not found. User created without roles.");
+          }
+        }
+        userDao.save(user);
+        log.info("User with ID: {} successfully created", user.getId());
+    }
+
+    public void createAdmin(String username, String password) {
+        log.info("Creating admin user: {}", username);
+        Role adminRole = roleDao.findByName("ADMIN");
+        if (adminRole == null) {
+            log.error("Admin role 'ADMIN' not found. User created without roles.");
+            throw new RuntimeException("Admin role 'ADMIN' not found");
+        }
+
+        User adminUser = new User();
+        adminUser.setUsername(username);
+        adminUser.setPassword(passwordEncoder.encode(password));
+        adminUser.setRoles(new HashSet<>(Collections.singletonList(adminRole)));
+        userDao.save(adminUser);
+        log.info("User with ID: {} successfully created", adminUser.getId());
     }
 }
