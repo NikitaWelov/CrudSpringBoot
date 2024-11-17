@@ -13,7 +13,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f9f9f9;
+            background-color: #f5f7fa;
         }
 
         #container {
@@ -28,57 +28,38 @@
         h1 {
             font-size: 24px;
             font-weight: 500;
-            color: #333333;
+            color: #202124;
             margin-bottom: 20px;
         }
 
-        #user-management {
-            background-color: #f1f3f4;
-            padding: 20px;
-            border-radius: 8px;
+        #user-search {
             margin-bottom: 20px;
         }
 
-        #user-management label {
+        #user-search label {
             display: block;
             text-align: left;
-            margin: 10px 0 5px;
+            margin-bottom: 5px;
             font-weight: 500;
-            color: #555555;
+            color: #5f6368;
         }
 
-        #user-management input[type="text"] {
+        #user-search input[type="text"] {
             padding: 12px;
             width: calc(100% - 24px);
-            margin-bottom: 10px;
             box-sizing: border-box;
-            border: 1px solid #d1d1d1;
+            border: 1px solid #dadce0;
             border-radius: 8px;
             font-size: 14px;
-            color: #333333;
+            color: #202124;
             background-color: #ffffff;
             transition: border 0.3s ease;
         }
 
-        #user-management input[type="text"]:focus {
-            border-color: #4285f4;
+        #user-search input[type="text"]:focus {
+            border-color: #1a73e8;
             outline: none;
-        }
-
-        #user-management button {
-            padding: 12px 24px;
-            background-color: #4285f4;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s ease;
-        }
-
-        #user-management button:hover {
-            background-color: #357ae8;
+            background-color: #f1f3f4;
         }
 
         #user-list {
@@ -96,18 +77,25 @@
             border-radius: 8px;
             background-color: #ffffff;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.3s ease;
+            transition: box-shadow 0.3s ease, transform 0.2s ease;
         }
 
         .user-item:hover {
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
         }
 
         .user-details {
-            flex: 1;
-            text-align: left;
-            font-size: 14px;
-            color: #555555;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .user-details label {
+            font-size: 12px;
+            font-weight: 500;
+            color: #70757a;
+            margin-bottom: 2px;
         }
 
         .actions {
@@ -132,7 +120,7 @@
         }
 
         .actions .delete-button:hover {
-            background-color: #c5221f;
+            background-color: #b71c1c;
         }
 
         .actions .save-role-button {
@@ -141,30 +129,30 @@
         }
 
         .actions .save-role-button:hover {
-            background-color: #2b8c3c;
+            background-color: #2a8c4a;
         }
 
         .editable {
             cursor: text;
             padding: 2px 5px;
             border: 1px dashed transparent;
-            color: #333333;
+            color: #202124;
             transition: border 0.3s ease, background-color 0.3s ease;
         }
 
         .editable:focus {
             outline: none;
-            border: 1px dashed #4285f4;
+            border: 1px dashed #1a73e8;
             background-color: #f1f3f4;
         }
 
         select {
             padding: 6px;
-            border: 1px solid #d1d1d1;
+            border: 1px solid #dadce0;
             border-radius: 8px;
-            background-color: white;
+            background-color: #ffffff;
             font-size: 12px;
-            color: #333333;
+            color: #202124;
         }
     </style>
 </head>
@@ -172,14 +160,9 @@
 <div id="container">
     <h1>Пользователи</h1>
 
-    <div id="user-management">
-        <label for="username-input">Имя пользователя</label>
-        <input type="text" id="username-input" placeholder="Например: john_doe">
-        <label for="lastname-input">Фамилия</label>
-        <input type="text" id="lastname-input" placeholder="Например: Doe">
-        <label for="email-input">Email</label>
-        <input type="text" id="email-input" placeholder="Например: john@example.com">
-        <button id="create-button">Создать пользователя</button>
+    <div id="user-search">
+        <label for="search-input">Поиск по имени пользователя</label>
+        <input type="text" id="search-input" placeholder="Введите имя пользователя" oninput="searchUsers()">
     </div>
 
     <div id="user-list">
@@ -189,68 +172,77 @@
 
 <script>
     let users = [
-        { id: 1, username: "john_doe", lastname: "Doe", email: "john@example.com", role: "user" },
-        { id: 2, username: "jane_smith", lastname: "Smith", email: "jane@example.com", role: "admin" }
+        { id: 1, username: "john_doe", lastname: "Doe", email: "john@example.com", roles: ["USER"] },
+        { id: 2, username: "jane_smith", lastname: "Smith", email: "jane@example.com", roles: ["ADMIN", "MODERATOR"] }
     ];
 
     const userList = document.getElementById('user-list');
-    const usernameInput = document.getElementById('username-input');
-    const lastnameInput = document.getElementById('lastname-input');
-    const emailInput = document.getElementById('email-input');
-    const createButton = document.getElementById('create-button');
+    const searchInput = document.getElementById('search-input');
 
-    function renderUserItems() {
+    /**
+     * Функция отрисовки списка пользователей
+     */
+    function renderUserItems(filteredUsers = users) {
         userList.innerHTML = '';
-        users.forEach(user => {
+        filteredUsers.forEach(user => {
             const userItem = document.createElement('div');
             userItem.className = 'user-item';
 
             const roleSelectHtml = `
-            <select id="roleSelect${user.id}" class="role-select" multiple>
-                <option value="USER" ${user.roles.includes('USER') ? 'selected' : ''}>User</option>
-                <option value="ADMIN" ${user.roles.includes('ADMIN') ? 'selected' : ''}>Admin</option>
-                <option value="MODERATOR" ${user.roles.includes('MODERATOR') ? 'selected' : ''}>Moderator</option>
-            </select>
-        `;
+        <select id="roleSelect${user.id}" class="role-select">
+            <option value="">Выберите роль</option>
+            <option value="USER" ${user.roles.includes('USER') ? 'selected' : ''}>User</option>
+            <option value="ADMIN" ${user.roles.includes('ADMIN') ? 'selected' : ''}>Admin</option>
+            <option value="MODERATOR" ${user.roles.includes('MODERATOR') ? 'selected' : ''}>Moderator</option>
+        </select>
+    `;
 
             userItem.innerHTML = `
-            <div class="user-details">
-                <!-- ... остальные поля ... -->
+        <div class="user-details">
+            <div>
+                <label for="username${user.id}">Username</label>
+                <span id="username${user.id}" class="editable" contenteditable
+                      onkeydown="handleEnter(event, ${user.id}, 'username', this)">
+                    ${user.username}
+                </span>
             </div>
-            <div class="actions">
-                ${roleSelectHtml}
-                <button class="save-role-button" onclick="saveRole(${user.id})">Сохранить роли</button>
-                <button class="delete-button" onclick="deleteUser(${user.id})">Удалить</button>
+            <div>
+                <label for="lastname${user.id}">Lastname</label>
+                <span id="lastname${user.id}" class="editable" contenteditable
+                      onkeydown="handleEnter(event, ${user.id}, 'lastname', this)">
+                    ${user.lastname}
+                </span>
             </div>
-        `;
+            <div>
+                <label for="email${user.id}">Email</label>
+                <span id="email${user.id}" class="editable" contenteditable
+                      onkeydown="handleEnter(event, ${user.id}, 'email', this)">
+                    ${user.email}
+                </span>
+            </div>
+        </div>
+        <div class="actions">
+            ${roleSelectHtml}
+            <button class="save-role-button" onclick="saveRole(${user.id})">Сохранить роль</button>
+            <button class="delete-button" onclick="deleteUser(${user.id})">Удалить</button>
+        </div>
+    `;
             userList.appendChild(userItem);
         });
     }
 
-    function createUser() {
-        const username = usernameInput.value.trim();
-        const lastname = lastnameInput.value.trim();
-        const email = emailInput.value.trim();
-
-        if (username && lastname && email) {
-            const newUser = { username, lastname, email };
-
-            fetch('/users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser),
-            })
-                .then(response => response.json())
-                .then(user => {
-                    users.push(user);
-                    renderUserItems();
-                    usernameInput.value = '';
-                    lastnameInput.value = '';
-                    emailInput.value = '';
-                });
-        }
+    /**
+     * Функция поиска пользователей
+     */
+    function searchUsers() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        const filteredUsers = users.filter(user => user.username.toLowerCase().includes(searchTerm));
+        renderUserItems(filteredUsers);
     }
 
+    /**
+     * Обновление данных пользователя
+     */
     function updateUser(userId, field, value) {
         if (value.trim() === "") return;
 
@@ -258,15 +250,22 @@
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ [field]: value }),
-        }).then(response => {
-            if (response.ok) {
-                users = users.map(user => (user.id === userId ? { ...user, [field]: value } : user));
-            } else {
-                alert(`Ошибка сохранения изменения ${field}`);
-            }
-        });
+        })
+            .then(response => {
+                if (response.ok) {
+                    users = users.map(user => (user.id === userId ? { ...user, [field]: value } : user));
+                } else {
+                    alert(`Ошибка сохранения изменения ${field}`);
+                }
+            })
+            .catch(error => {
+                console.error("Ошибка обновления пользователя:", error);
+            });
     }
 
+    /**
+     * Обработка нажатия Enter для редактирования
+     */
     function handleEnter(event, userId, field, element) {
         if (event.key === "Enter") {
             event.preventDefault();
@@ -275,24 +274,22 @@
         }
     }
 
+    /**
+     * Сохранение выбранной роли пользователя
+     */
     function saveRole(userId) {
         const roleSelect = document.getElementById(`roleSelect${userId}`);
-        const selectedRoles = Array.from(roleSelect.selectedOptions)
-            .map(option => option.value);
+        const selectedRoles = Array.from(roleSelect.selectedOptions).map(option => option.value);
 
         fetch(`/api/users/${userId}/roles`, {
             method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content // Для Spring Security
-            },
-            body: JSON.stringify(selectedRoles)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(selectedRoles),
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Failed to update roles');
+                    throw new Error("Ошибка при обновлении ролей");
                 }
-                // Обновляем UI только после успешного сохранения
                 const user = users.find(u => u.id === userId);
                 if (user) {
                     user.roles = selectedRoles;
@@ -300,20 +297,27 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Ошибка при обновлении ролей');
+                console.error("Ошибка сохранения ролей:", error);
+                alert("Не удалось обновить роли");
             });
     }
 
+    /**
+     * Удаление пользователя
+     */
     function deleteUser(userId) {
-        fetch(`/users/${userId}`, { method: 'DELETE' }).then(() => {
-            users = users.filter(user => user.id !== userId);
-            renderUserItems();
-        });
+        fetch(`/users/${userId}`, { method: 'DELETE' })
+            .then(() => {
+                users = users.filter(user => user.id !== userId);
+                renderUserItems();
+            })
+            .catch(error => {
+                console.error("Ошибка удаления пользователя:", error);
+                alert("Не удалось удалить пользователя");
+            });
     }
 
-    createButton.addEventListener('click', createUser);
-
+    // Инициализация рендера
     renderUserItems();
 </script>
 </body>
