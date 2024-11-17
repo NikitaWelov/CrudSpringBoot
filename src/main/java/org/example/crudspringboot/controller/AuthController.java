@@ -41,7 +41,11 @@ public class AuthController {
 
     @PostMapping("/registration")
     @Transactional
-    public String registerUser(@RequestParam String username, @RequestParam String password) {
+    public String registerUser(@RequestParam String username,
+                               @RequestParam String password,
+                               @RequestParam String lastname,
+                               @RequestParam String email
+    ) {
         if (userService.getByUsername(username) != null) {
             return "redirect:/registration?error=exists";
         }
@@ -49,6 +53,8 @@ public class AuthController {
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
+        user.setLastname(lastname);
+        user.setEmail(email);
 
         // Назначаем роль USER по умолчанию
         Role userRole = roleService.getDefaultRole();

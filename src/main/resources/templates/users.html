@@ -171,10 +171,7 @@
 </div>
 
 <script>
-    let users = [
-        { id: 1, username: "john_doe", lastname: "Doe", email: "john@example.com", roles: ["USER"] },
-        { id: 2, username: "jane_smith", lastname: "Smith", email: "jane@example.com", roles: ["ADMIN", "MODERATOR"] }
-    ];
+    let users = [];
 
     const userList = document.getElementById('user-list');
     const searchInput = document.getElementById('search-input');
@@ -184,7 +181,7 @@
      */
     async function fetchUsers() {
         try {
-            const response = await fetch('/list'); // Обращение к вашему контроллеру
+            const response = await fetch('users/list'); // Обращение к вашему контроллеру
             if (!response.ok) {
                 throw new Error(`Ошибка при получении пользователей: ${response.statusText}`);
             }
@@ -336,6 +333,7 @@
 
     // Инициализация рендера
     renderUserItems();
+    window.onload = fetchUsers;
 </script>
 </body>
 </html>
