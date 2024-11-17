@@ -45,11 +45,13 @@ public class UserService {
             log.error("User with ID: {} not found", id);
             throw new RuntimeException("User not found");
         }
-
         log.info("Updating user details: {}", updatedUser);
-        user.setUsername(updatedUser.getUsername());
-        user.setLastname(updatedUser.getLastname());
-        user.setEmail(updatedUser.getEmail());
+        if (updatedUser.getUsername() != null)
+            user.setUsername(updatedUser.getUsername());
+        if (updatedUser.getLastname() != null)
+            user.setLastname(updatedUser.getLastname());
+        if (updatedUser.getEmail() != null)
+            user.setEmail(updatedUser.getEmail());
         userDao.save(user);
         log.info("User with ID: {} successfully updated", id);
     }
