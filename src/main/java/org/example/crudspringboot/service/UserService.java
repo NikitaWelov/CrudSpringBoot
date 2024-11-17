@@ -124,4 +124,8 @@ public class UserService {
         userDao.save(adminUser);
         log.info("User with ID: {} successfully created", adminUser.getId());
     }
+
+    public User getByUsername(String username) {
+        return userDao.findByUsername(username);
+    }
 }
