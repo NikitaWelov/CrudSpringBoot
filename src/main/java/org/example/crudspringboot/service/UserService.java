@@ -1,85 +1,88 @@
 package org.example.crudspringboot.service;
 
-import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.example.crudspringboot.dao.RoleDao;
 import org.example.crudspringboot.dao.UserDao;
 import org.example.crudspringboot.model.Role;
-import org.example.crudspringboot.model.RoleType;
 import org.example.crudspringboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UserService {
 
     private final UserDao userDao;
-    private final RoleService roleService;
     private final RoleDao roleDao;
 
     @Autowired
-    public UserService(UserDao userDao, RoleService roleService, RoleDao roleDao) {
+    public UserService(UserDao userDao, RoleDao roleDao) {
         this.userDao = userDao;
-        this.roleService = roleService;
         this.roleDao = roleDao;
     }
 
-    @Transactional
-    public void saveUser(User user) {
-        if (user.getRoles() == null || user.getRoles().isEmpty()) {
-            Role defaultRole = roleService.getDefaultRole();
-            user.setRoles(Collections.singleton(defaultRole));
-        }
-        userDao.save(user);
-    }
-
-    // TODO: Добавить метод updateUserRoles(Long userId, Set<Role> roles) который будет обновлять роль у пользователя
-
-    @Transactional
-    public void updateUserRoles(Long userId, Set<Role> roles) {
-        User user = userDao.findById(userId);
-        if (user.getRoles() != null) {
-            user.setRoles(roles);
-        }
-        userDao.save(user);
-    }
-
-    @Transactional
-    public void deleteUser(User user) {
-        userDao.delete(user);
-    }
-
-    @Transactional
-    public User getUserById(Long id) {
-        return userDao.findById(id);
-    }
-
-    @Transactional
     public List<User> getAllUsers() {
-        return userDao.findAll();
+        log.info("Fetching all users...");
+        List<User> users = userDao.findAll();
+        log.info("Found {} users", users.size());
+        return users;
     }
 
-    @Transactional
-    public User getUserByUsername(String username) {
-        return userDao.findByUsername(username);
-    }
+    public void updateUser(Long id, User updatedUser) {
+        log.info("Updating user with ID: {}", id);
+        User user = userDao.findById(id);
 
-    @Transactional
-    public void updateUser(User user) {
-        User oldUser = userDao.findById(user.getId());
+        if (user == null) {
+            log.error("User with ID: {} not found", id);
+            throw new RuntimeException("User not found");
+        }
 
-        if (!oldUser.getUsername().equals(user.getUsername())) {
-            user.setUsername(user.getUsername());
-        }
-        if (!oldUser.getLastname().equals(user.getLastname())) {
-            user.setLastname(user.getLastname());
-        }
-        if (!oldUser.getEmail().equals(user.getEmail())) {
-            user.setEmail(user.getEmail());
-        }
+        log.info("Updating user details: {}", updatedUser);
+        user.setUsername(updatedUser.getUsername());
+        user.setLastname(updatedUser.getLastname());
+        user.setEmail(updatedUser.getEmail());
         userDao.save(user);
+        log.info("User with ID: {} successfully updated", id);
+    }
+
+    public void updateUserRoles(Long id, Set<String> roleNames) {
+        log.info("Updating roles for user with ID: {}", id);
+        User user = userDao.findById(id);
+
+        if (user == null) {
+            log.error("User with ID: {} not found", id);
+            throw new RuntimeException("User not found");
+        }
+
+        log.info("Roles to be updated: {}", roleNames);
+        Set<Role> roles = roleNames.stream()
+                .map(roleName -> {
+                    Role role = roleDao.findByName(roleName);
+                    if (role == null) {
+                        log.error("Role not found: {}", roleName);
+                        throw new RuntimeException("Role not found: " + roleName);
+                    }
+                    log.info("Found role: {}", roleName);
+                    return role;
+                })
+                .collect(Collectors.toSet());
+
+        user.setRoles(roles);
+        userDao.save(user);
+        log.info("Roles for user with ID: {} successfully updated", id);
+    }
+
+    public void deleteUser(Long id) {
+        log.info("Deleting user with ID: {}", id);
+        if (userDao.findById(id) == null) {
+            log.error("User with ID: {} not found", id);
+            throw new RuntimeException("User not found");
+        }
+        userDao.deleteById(id);
+        log.info("User with ID: {} successfully deleted", id);
     }
 }

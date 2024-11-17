@@ -180,6 +180,23 @@
     const searchInput = document.getElementById('search-input');
 
     /**
+     * Получение списка пользователей с сервера
+     */
+    async function fetchUsers() {
+        try {
+            const response = await fetch('/list'); // Обращение к вашему контроллеру
+            if (!response.ok) {
+                throw new Error(`Ошибка при получении пользователей: ${response.statusText}`);
+            }
+            users = await response.json(); // Сохраняем пользователей в глобальной переменной
+            renderUserItems(); // Отрисовываем пользователей после получения данных
+        } catch (error) {
+            console.error('Ошибка при загрузке пользователей:', error);
+            alert('Не удалось загрузить пользователей.');
+        }
+    }
+
+    /**
      * Функция отрисовки списка пользователей
      */
     function renderUserItems(filteredUsers = users) {
