@@ -1,6 +1,7 @@
 package org.example.crudspringboot.service;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.example.crudspringboot.dao.RoleDao;
 import org.example.crudspringboot.dao.UserDao;
@@ -30,6 +31,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public List<User> getAllUsers() {
         log.info("Fetching all users...");
         List<User> users = userDao.findAll();
@@ -37,6 +39,7 @@ public class UserService {
         return users;
     }
 
+    @Transactional
     public void updateUser(Long id, User updatedUser) {
         log.info("Updating user with ID: {}", id);
         User user = userDao.findById(id);
@@ -56,6 +59,7 @@ public class UserService {
         log.info("User with ID: {} successfully updated", id);
     }
 
+    @Transactional
     public void updateUserRoles(Long id, Set<RoleType> roleNames) {
         log.info("Updating roles for user with ID: {}", id);
         User user = userDao.findById(id);
@@ -83,6 +87,7 @@ public class UserService {
         log.info("Roles for user with ID: {} successfully updated", id);
     }
 
+    @Transactional
     public void deleteUser(Long id) {
         log.info("Deleting user with ID: {}", id);
         if (userDao.findById(id) == null) {
@@ -93,6 +98,7 @@ public class UserService {
         log.info("User with ID: {} successfully deleted", id);
     }
 
+    @Transactional
     public void saveUser(User user) {
         log.info("Saving user: {} in process...", user);
         userDao.save(user);
