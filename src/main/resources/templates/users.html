@@ -298,7 +298,7 @@
         const roleSelect = document.getElementById(`roleSelect${userId}`);
         const selectedRoles = Array.from(roleSelect.selectedOptions).map(option => option.value);
 
-        fetch(`/api/users/${userId}/roles`, {
+        fetch(`/users/${userId}/roles`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(selectedRoles),

@@ -24,6 +24,6 @@ public class RoleService {
 
     @Transactional
     public Role getDefaultRole() {
-        return roleDao.findByName(RoleType.USER.name());
+        return roleDao.findByName(RoleType.USER);
     }
 }

@@ -60,7 +60,7 @@ public class UserController {
     @ResponseBody
     public ResponseEntity<Void> updateUserRoles(
             @PathVariable Long id,
-            @RequestBody Set<String> roles) {
+            @RequestBody Set<RoleType> roles) {
         userService.updateUserRoles(id, roles);
         return ResponseEntity.ok().build();
     }

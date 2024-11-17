@@ -1,11 +1,14 @@
 package org.example.crudspringboot.service;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.example.crudspringboot.dao.RoleDao;
 import org.example.crudspringboot.dao.UserDao;
 import org.example.crudspringboot.model.Role;
+import org.example.crudspringboot.model.RoleType;
 import org.example.crudspringboot.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +21,13 @@ public class UserService {
 
     private final UserDao userDao;
     private final RoleDao roleDao;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserDao userDao, RoleDao roleDao) {
+    public UserService(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
         this.roleDao = roleDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<User> getAllUsers() {
@@ -49,7 +54,7 @@ public class UserService {
         log.info("User with ID: {} successfully updated", id);
     }
 
-    public void updateUserRoles(Long id, Set<String> roleNames) {
+    public void updateUserRoles(Long id, Set<RoleType> roleNames) {
         log.info("Updating roles for user with ID: {}", id);
         User user = userDao.findById(id);
 
@@ -84,5 +89,41 @@ public class UserService {
         }
         userDao.deleteById(id);
         log.info("User with ID: {} successfully deleted", id);
+    }
+
+    public void saveUser(User user) {
+        log.info("Saving user: {} in process...", user);
+        userDao.save(user);
+        log.info("User: {} fulled saved", user);
+    }
+
+    public User getByUsername(String username) {
+        return userDao.findByUsername(username);
+    }
+
+    @PostConstruct
+    public void init() {
+        if (userDao.findByUsername("admin") == null) {
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("admin"));
+
+            Role adminRole = roleDao.findByName(RoleType.ADMIN);
+            if (adminRole == null) {
+                adminRole = new Role();
+                adminRole.setName(RoleType.ADMIN);
+                roleDao.save(adminRole);
+            }
+            admin.setRoles(Set.of(adminRole));
+
+            saveUser(admin);
+        }
+
+        Role userRole = roleDao.findByName(RoleType.USER);
+        if (userRole == null) {
+            userRole = new Role();
+            userRole.setName(RoleType.USER);
+            roleDao.save(userRole);
+        }
     }
 }
