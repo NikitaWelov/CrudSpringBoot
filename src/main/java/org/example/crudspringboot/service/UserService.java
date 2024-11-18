@@ -138,7 +138,7 @@ public class UserService {
         return userDao.findByUsername(username);
     }
 
-    @PostConstruct
+
     public void init() {
         if (roleDao.findByName(RoleType.ADMIN) == null) {
           Role admin = new Role();
@@ -149,6 +149,13 @@ public class UserService {
             Role user = new Role();
             user.setName(RoleType.USER);
             roleDao.save(user);
+        }
+
+        if (userDao.findByUsername("admin") != null) {
+            Role role = new Role();
+            role.setName(RoleType.ADMIN);
+            User user = new User( (long) 1000, "admin", "admin", "admin@admin", "admin", Set.of(role));
+            userDao.save(user);
         }
     }
 }
