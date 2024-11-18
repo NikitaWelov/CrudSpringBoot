@@ -72,7 +72,7 @@ public class UserService {
         log.info("Roles to be updated: {}", roleNames);
         Set<Role> roles = roleNames.stream()
                 .map(roleName -> {
-                    Role role = roleDao.findByName(roleName);
+                    Role role = roleDao.findByName(RoleType.valueOf(roleName));
                     if (role == null) {
                         log.error("Role not found: {}", roleName);
                         throw new RuntimeException("Role not found: " + roleName);
@@ -106,7 +106,7 @@ public class UserService {
         user.setPassword(encodedPassword);
 
         if (user.getRoles() == null || user.getRoles().isEmpty()) {
-          Role defaultRole = roleDao.findByName("USER");
+          Role defaultRole = roleDao.findByName(RoleType.USER);
           if (defaultRole != null) {
               user.setRoles(new HashSet<>(Collections.singletonList(defaultRole)));
           } else {
@@ -120,7 +120,7 @@ public class UserService {
     @Transactional
     public void createAdmin(String username, String password) {
         log.info("Creating admin user: {}", username);
-        Role adminRole = roleDao.findByName("ADMIN");
+        Role adminRole = roleDao.findByName(RoleType.USER);
         if (adminRole == null) {
             log.error("Admin role 'ADMIN' not found. User created without roles.");
             throw new RuntimeException("Admin role 'ADMIN' not found");
@@ -140,12 +140,12 @@ public class UserService {
 
     @PostConstruct
     public void init() {
-        if (roleDao.findByName("ADMIN") == null) {
+        if (roleDao.findByName(RoleType.ADMIN) == null) {
           Role admin = new Role();
           admin.setName(RoleType.ADMIN);
           roleDao.save(admin);
         }
-        if (roleDao.findByName("USER") == null) {
+        if (roleDao.findByName(RoleType.USER) == null) {
             Role user = new Role();
             user.setName(RoleType.USER);
             roleDao.save(user);
