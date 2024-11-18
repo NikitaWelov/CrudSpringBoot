@@ -138,24 +138,29 @@ public class UserService {
         return userDao.findByUsername(username);
     }
 
-
+    @PostConstruct
     public void init() {
-        if (roleDao.findByName(RoleType.ADMIN) == null) {
-          Role admin = new Role();
-          admin.setName(RoleType.ADMIN);
-          roleDao.save(admin);
-        }
-        if (roleDao.findByName(RoleType.USER) == null) {
-            Role user = new Role();
-            user.setName(RoleType.USER);
-            roleDao.save(user);
+        if (userDao.findByUsername("admin") == null) {
+            User admin = new User();
+            admin.setUsername("admin");
+            admin.setPassword(passwordEncoder.encode("admin"));
+
+            Role adminRole = roleDao.findByName(RoleType.ADMIN);
+            if (adminRole == null) {
+                adminRole = new Role();
+                adminRole.setName(RoleType.ADMIN);
+                roleDao.save(adminRole);
+            }
+            admin.setRoles(Set.of(adminRole));
+
+            saveUser(admin);
         }
 
-        if (userDao.findByUsername("admin") != null) {
-            Role role = new Role();
-            role.setName(RoleType.ADMIN);
-            User user = new User( (long) 1000, "admin", "admin", "admin@admin", "admin", Set.of(role));
-            userDao.save(user);
+        Role userRole = roleDao.findByName(RoleType.USER);
+        if (userRole == null) {
+            userRole = new Role();
+            userRole.setName(RoleType.USER);
+            roleDao.save(userRole);
         }
     }
 }
