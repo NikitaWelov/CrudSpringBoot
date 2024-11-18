@@ -102,8 +102,6 @@ public class UserService {
     @Transactional
     public void saveUser(User user) {
         log.info("Creating user: {}", user);
-        String encodedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
 
         if (user.getRoles() == null || user.getRoles().isEmpty()) {
           Role defaultRole = roleDao.findByName(RoleType.USER);
@@ -138,29 +136,29 @@ public class UserService {
         return userDao.findByUsername(username);
     }
 
-    @PostConstruct
-    public void init() {
-        if (userDao.findByUsername("admin") == null) {
-            User admin = new User();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin"));
-
-            Role adminRole = roleDao.findByName(RoleType.ADMIN);
-            if (adminRole == null) {
-                adminRole = new Role();
-                adminRole.setName(RoleType.ADMIN);
-                roleDao.save(adminRole);
-            }
-            admin.setRoles(Set.of(adminRole));
-
-            saveUser(admin);
-        }
-
-        Role userRole = roleDao.findByName(RoleType.USER);
-        if (userRole == null) {
-            userRole = new Role();
-            userRole.setName(RoleType.USER);
-            roleDao.save(userRole);
-        }
-    }
+//    @PostConstruct
+//    public void init() {
+//        if (userDao.findByUsername("admin") == null) {
+//            User admin = new User();
+//            admin.setUsername("admin");
+//            admin.setPassword("admin");
+//
+//            Role adminRole = roleDao.findByName(RoleType.ADMIN);
+//            if (adminRole == null) {
+//                adminRole = new Role();
+//                adminRole.setName(RoleType.ADMIN);
+//                roleDao.save(adminRole);
+//            }
+//            admin.setRoles(Set.of(adminRole));
+//
+//            saveUser(admin);
+//        }
+//
+//        Role userRole = roleDao.findByName(RoleType.USER);
+//        if (userRole == null) {
+//            userRole = new Role();
+//            userRole.setName(RoleType.USER);
+//            roleDao.save(userRole);
+//        }
+//    }
 }
