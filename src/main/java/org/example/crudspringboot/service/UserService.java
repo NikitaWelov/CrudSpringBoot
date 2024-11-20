@@ -87,6 +87,10 @@ public class UserService {
         log.info("Roles for user with ID: {} successfully updated", id);
     }
 
+    public List<User> getUsersByName(String name) {
+        return userDao.findAllByUsername(name);
+    }
+
     @Transactional
     public void deleteUser(Long id) {
         log.info("Deleting user with ID: {}", id);
