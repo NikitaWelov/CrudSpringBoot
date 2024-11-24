@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,13 +23,15 @@ public class UserService {
 
     private final UserDao userDao;
     private final RoleDao roleDao;
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
 
     @Autowired
-    public UserService(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder) {
+    public UserService(UserDao userDao, RoleDao roleDao, PasswordEncoder passwordEncoder, RoleService roleService) {
         this.userDao = userDao;
         this.roleDao = roleDao;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
     @Transactional
@@ -37,6 +40,22 @@ public class UserService {
         List<User> users = userDao.findAll();
         log.info("Found {} users", users.size());
         return users;
+    }
+
+    @Transactional
+    public void registerUser(User user) {
+        if (getByUsername(user.getUsername()) != null) {
+            throw new IllegalStateException("User already exists");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        // Назначаем роль USER по умолчанию
+        Role userRole = roleService.getDefaultRole();
+        user.setRoles(Collections.singleton(userRole));
+
+        // Сохраняем пользователя
+        saveUser(user);
     }
 
     @Transactional

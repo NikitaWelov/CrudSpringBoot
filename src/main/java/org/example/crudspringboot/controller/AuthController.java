@@ -1,32 +1,34 @@
 package org.example.crudspringboot.controller;
 
 import jakarta.transaction.Transactional;
-import org.example.crudspringboot.model.Role;
-import org.example.crudspringboot.model.RoleType;
+import org.example.crudspringboot.config.security.UserValidator;
 import org.example.crudspringboot.model.User;
-import org.example.crudspringboot.service.RoleService;
 import org.example.crudspringboot.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.Collections;
 
 @Controller
 public class AuthController {
 
     private final UserService userService;
-    private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
+    private final UserValidator userValidator;
 
     @Autowired
-    public AuthController(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder) {
+    public AuthController(UserService userService, UserValidator userValidator) {
         this.userService = userService;
-        this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
+        this.userValidator = userValidator;
+    }
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.addValidators(userValidator);
     }
 
     @GetMapping("/login")
@@ -35,34 +37,25 @@ public class AuthController {
     }
 
     @GetMapping("/registration")
-    public String registrationPage() {
+    public String registrationPage(Model model) {
+        model.addAttribute("user", new User());
         return "registration";
     }
 
     @PostMapping("/registration")
     @Transactional
-    public String registerUser(@RequestParam String username,
-                               @RequestParam String password,
-                               @RequestParam String lastname,
-                               @RequestParam String email
-    ) {
-        if (userService.getByUsername(username) != null) {
-            return "redirect:/registration?error=exists";
+    public String registerUser(@ModelAttribute("user") User user, BindingResult bindingResult) {
+        userValidator.validate(user, bindingResult);
+
+        if (bindingResult.hasErrors()) {
+            return "registration";
         }
 
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(password));
-        user.setLastname(lastname);
-        user.setEmail(email);
-
-        // Назначаем роль USER по умолчанию
-        Role userRole = roleService.getDefaultRole();
-        user.setRoles(Collections.singleton(userRole));
-
-        // Сохраняем пользователя
-        userService.saveUser(user);
-
+        try {
+            userService.registerUser(user);
+        } catch (IllegalStateException e) {
+            return "redirect:/registration?error=exists";
+        }
         return "redirect:/login";
     }
 }
